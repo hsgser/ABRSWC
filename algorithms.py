@@ -340,3 +340,29 @@ def compute_div(U, OptCost, z, S):
                     bestSubgroup[comb]      = (comb1, comb2)
     
     return OptCost, bestSubgroup
+
+def greedy_approach(U, N, dist):
+    """
+    Compute travel cost in the greedy approach, i.e.,
+    each user travels to the nearest POI.
+
+    Parameters
+    ----------
+    U: array
+        List of users.
+    N: dict
+        Dictionary of nearest POI
+    dist: array
+        Pairwise distance.
+    
+    Returns
+    -------
+    total_cost: int
+        Total travel cost.
+    """
+    total_dist = 0
+
+    for u in U:
+        total_dist += dist[u][N[u]]
+    
+    return total_dist
