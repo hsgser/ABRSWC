@@ -48,8 +48,10 @@ def iterative_nearest_neighbor(U, S, dist):
 
     Returns
     -------
-    cls: dict
+    groups: dict
         Dictionary of groups.
+    n_cls: int
+        Number of groups.
     """
     length  = len(U)
     n_cls   = np.ceil(length/S)
@@ -351,7 +353,7 @@ def greedy_approach(U, N, dist):
     U: array
         List of users.
     N: dict
-        Dictionary of nearest POI
+        Dictionary of nearest POI.
     dist: array
         Pairwise distance.
     
@@ -366,3 +368,55 @@ def greedy_approach(U, N, dist):
         total_dist += dist[u][N[u]]
     
     return total_dist
+
+def group_by_nearest_POI(U, N):
+    """
+    Divide all users into groups w.r.t their nearest POIs. 
+    
+    Parameters
+    ----------
+    U: array
+        List of users.
+    N: dict
+        Dictionary of nearest POI.
+    
+    Returns
+    -------
+    groups: dict
+        Dictionary of groups.
+    """
+    groups = defaultdict(list)
+
+    for u in U:
+        groups[N[u]].append(u) 
+    
+    return groups
+
+def cal_travel_cost(group, bestSubgroup, OptCost):
+    """
+    Compute total travel cost of the group 
+    in accordance to the optimal travel plan.
+
+    Parameters
+    ----------
+    group: array
+        List of users.
+    bestSubgroup: dict
+        Best subgroup of each combination to minimize travel cost.
+    OptCost: dict
+        Optimal travel cost.
+    
+    Returns
+    -------
+    cost: int
+        Total travel cost.
+    """
+    cost    = 0
+
+    if tuple(group) in bestSubgroup:
+        for comb in bestSubgroup[tuple(group)]:
+            cost += OptCost[comb]
+    else: # the case when number of users in the last group <= z.
+        cost = OptCost[tuple(group)]
+
+    return cost
