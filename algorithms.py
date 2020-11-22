@@ -316,8 +316,6 @@ def compute_div(U, OptCost, z, S):
         Optimal travel cost.
     z: int
         Number of seats per car.
-    S: int
-        Group size.
 
     Returns
     -------
@@ -328,7 +326,7 @@ def compute_div(U, OptCost, z, S):
     """
     bestSubgroup    = {}
 
-    for j in range(z+1, S+1):
+    for j in range(z+1, len(U)+1):
         for comb in combinations(U, j):
             OptCost[comb]   = float('inf')
             all_combs       = powerset(comb)
