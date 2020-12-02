@@ -29,7 +29,7 @@ for S in sizes:
 save_experiment_results(data_dir, 'compare_group_size', run_time, travel_cost)
 
 # Compare number of users
-sizes       = np.arange(4, 101, step=4)
+sizes       = np.arange(8, 101, step=8)
 run_time    = []    
 travel_cost = []
 
@@ -58,7 +58,7 @@ for N_p in sizes:
     run_time.extend(_time)
     travel_cost.extend(_cost)
 
-save_experiment_results(data_dir, 'compare_number_of_user', run_time, travel_cost)
+save_experiment_results(data_dir, 'compare_number_of_poi', run_time, travel_cost)
 
 # Compare extra ratio
 sizes       = np.linspace(1, 2, num=11)
