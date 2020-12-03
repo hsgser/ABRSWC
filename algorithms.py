@@ -304,7 +304,7 @@ def compute_cost(U, P, G, z, N, dist, epsilon):
     
     return cost, OptCost, OptPOI, J, bestDiv, bestSubgroup
 
-def compute_div(U, OptCost, z, S):
+def compute_div(U, OptCost, z):
     """
     Compute the optimal division of a group into subgroups.
 

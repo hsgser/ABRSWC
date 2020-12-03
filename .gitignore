@@ -132,3 +132,4 @@ dmypy.json
 # experiment results
 data/cost/
 data/time/
+data/figure/
