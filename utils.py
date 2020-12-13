@@ -385,6 +385,7 @@ def plot_approx_ratio(df, X, exp_name, ylim, fig_dir='data/figure', xlabel='Run'
         The location of the legend
     """
     _, ax = plt.subplots(figsize=(10, 7))
+    ax.plot(X, np.ones_like(X), marker='o', markersize=8, color='blue', label='optimal')
     ax.plot(X, df['approx_ratio'], marker='d', markersize=8, color='orange', label='approx')
     ax.plot(X, df['approx_woc_ratio'], marker='s', markersize=8, color='green', label='approx_woc')
     ax.plot(X, df['greedy_ratio'],  marker='v', markersize=8, color='red', label='greedy')
@@ -429,6 +430,7 @@ def plot_rs_efficiency(df, X, exp_name, ylim, fig_dir='data/figure', xlabel='Run
         ax.plot(X, df['optimal_gain'], marker='o', markersize=8, color='blue', label='optimal')
     ax.plot(X, df['approx_gain'], marker='d', markersize=8, color='orange', label='approx')
     ax.plot(X, df['approx_woc_gain'], marker='s', markersize=8, color='green', label='approx_woc')
+    ax.plot(X, np.ones_like(X),  marker='v', markersize=8, color='red', label='greedy')
     ax.set_ylim(*ylim)
     ax.tick_params(axis='both', labelsize=20)
     ax.set_xlabel(xlabel, fontsize=30)
