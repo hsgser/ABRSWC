@@ -33,7 +33,7 @@ run_time, travel_cost = run_experiment2(G, pdist, param='S', S=sizes, run_optima
 save_experiment_results(data_dir, 'compare_group_size', run_time, travel_cost)
 
 # Compare number of users
-sizes       = np.arange(8, 101, step=8)
+sizes       = np.arange(8, 81, step=8)
 run_time    = []    
 travel_cost = []
 
@@ -65,7 +65,7 @@ for N_p in sizes:
 save_experiment_results(data_dir, 'compare_number_of_poi', run_time, travel_cost)
 
 # Compare extra ratio
-sizes       = np.linspace(0.4, 0.5, num=2)
+sizes       = np.linspace(0, 1, num=11)
 run_time    = []    
 travel_cost = []
 

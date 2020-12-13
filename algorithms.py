@@ -156,16 +156,19 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
     minCost: int
         Travel cost to the nearest POI.
     """
-    Q           = priority_dict() # node set
+    Q           = [] # node set
     J           = {} # meeting points dict
     X           = [] # NIMPs
     visited     = defaultdict(bool)
 
     # intialization
     for m in M:
-        Q[m]        = cost[m]
-        J[m]        = m
-        visited[m]  = True
+        heappush(Q, (cost[m], m))
+        J[(m, cost[m])] = m
+        visited[m]      = True
+    
+    # if comb == (463, 593):
+    #     print(Q)
     
     prev_cost   = -1
     prev_nodes  = []
@@ -174,41 +177,40 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
     
     while len(Q) > 0:
         # find the next node
-        u               = Q.pop_smallest()
-        curr_cost       = cost[u]
-        visited[u]      = True
-        dist2NIMP       = cost[u] - cost[J[u]]
-        dist2POI        = dist[u][N[u]]
-        violation       = False
+        curr_cost, u = heappop(Q)
+        # if comb == (463, 593):
+        #     print(curr_cost, u)
         # check detour constraint
-        for c in comb:
-            travelDist[(c, u)]  = travelDist[(c, J[u])] + dist2NIMP
-            if (travelDist[(c, u)] + dist2POI) > (1 + epsilon)*dist[c][N[c]]:
-                violation       = True
-                break
-        if not violation:
-            if curr_cost > prev_cost:
-                if prev_cost != -1: # check first node
-                    X.extend(prev_nodes)
-                prev_nodes  = [u]
-            else:
-                prev_nodes.append(u)
-            prev_cost       = curr_cost
-            if u in B: # terminate if a boundary node is found
-                X.append(u)
-                p           = u
-                minCost     = cost[u]
-                break
-            
-            for v in G.neighbors(u):
-                if not visited[v]:
-                    cost[v]     = float('inf')
-                    visited[v]  = True
-                temp            = cost[u] + G.edges[u, v]['length']
-                if cost[v] > temp:
+        if curr_cost > prev_cost:
+            if prev_cost != -1: # check first node
+                X.extend(prev_nodes)
+            prev_nodes  = [u]
+        else:
+            prev_nodes.append(u)
+        prev_cost       = curr_cost
+        if u in B: # terminate if a boundary node is found
+            X.append(u)
+            p           = u
+            minCost     = curr_cost
+            break
+
+        for v in G.neighbors(u):
+            if not visited[v]:
+                cost[v]     = float('inf')
+                visited[v]  = True
+            temp            = curr_cost + G.edges[u, v]['length']
+            if cost[v] > temp:
+                # check detour constraint
+                violation       = False
+                for c in comb:
+                    travelDist[(c, v, temp)]  = travelDist[(c, u, curr_cost)] + G.edges[u, v]['length']
+                    if (travelDist[(c, v, temp)] + dist[v][N[v]]) > (1 + epsilon)*dist[c][N[c]]:
+                        violation       = True
+                        break
+                if not violation:
                     cost[v]     = temp
-                    J[v]        = J[u]
-                    Q[v]        = cost[v]
+                    J[(v, cost[v])]     = J[(u, curr_cost)]
+                    heappush(Q, (cost[v], v))
 
     return set(X), cost, travelDist, J, p, minCost
 
@@ -258,7 +260,7 @@ def compute_cost(U, P, G, z, N, dist, epsilon):
     # intialization
     for u in U:
         X[(u,)], cost[(u,)], travelDist[(u,)], J[(u,)], OptPOI[(u,)], OptCost[(u,)] = find_nimp(
-            [u], [u], {u: 0}, {(u, u): 0}, P, G, N, dist, epsilon)
+            [u], [u], {u: 0}, {(u, u, 0): 0}, P, G, N, dist, epsilon)
 
     # dynamic programming
     # loop through each combination of users
@@ -294,9 +296,9 @@ def compute_cost(U, P, G, z, N, dist, epsilon):
                         cost[comb][m]       = temp
                         bestDiv[comb][m]    = (comb1, comb2)
                         for c in comb1:
-                            travelDist[comb][(c, m)] = travelDist[comb1][(c, m)]
+                            travelDist[comb][(c, m, temp)] = travelDist[comb1][(c, m, cost[comb1][m])]
                         for c in comb2:
-                            travelDist[comb][(c, m)] = travelDist[comb2][(c, m)]    
+                            travelDist[comb][(c, m, temp)] = travelDist[comb2][(c, m, cost[comb2][m])]    
             if len(M[comb]) > 0:
                 X[comb], cost[comb], travelDist[comb], J[comb], p, temp = find_nimp(
                     M[comb], comb, cost[comb], travelDist[comb], P, G, N, dist, epsilon)
