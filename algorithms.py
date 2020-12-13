@@ -3,6 +3,7 @@ import numpy as np
 from heapq import heappush, heappop
 from collections import defaultdict
 from itertools import combinations, chain
+from priority_dict import priority_dict
 
 def find_nearest_neighbors(U, s, dist, k=1):
     """
@@ -155,15 +156,16 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
     minCost: int
         Travel cost to the nearest POI.
     """
-    Q           = [] # node set
+    Q           = priority_dict() # node set
     J           = {} # meeting points dict
     X           = [] # NIMPs
     visited     = defaultdict(bool)
 
     # intialization
     for m in M:
-        heappush(Q, (cost[m], m))
-        J[m]    = m
+        Q[m]        = cost[m]
+        J[m]        = m
+        visited[m]  = True
     
     prev_cost   = -1
     prev_nodes  = []
@@ -172,7 +174,8 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
     
     while len(Q) > 0:
         # find the next node
-        curr_cost, u    = heappop(Q)
+        u               = Q.pop_smallest()
+        curr_cost       = cost[u]
         visited[u]      = True
         dist2NIMP       = cost[u] - cost[J[u]]
         dist2POI        = dist[u][N[u]]
@@ -205,7 +208,7 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
                 if cost[v] > temp:
                     cost[v]     = temp
                     J[v]        = J[u]
-                    heappush(Q, (cost[v], v))
+                    Q[v]        = cost[v]
 
     return set(X), cost, travelDist, J, p, minCost
 

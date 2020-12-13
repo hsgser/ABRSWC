@@ -89,7 +89,7 @@ def run_experiment1(G, pdist, repeats=10, z=4, N_u=16, N_p=20, run_optimal=True)
         Total travel distance.
     """
     # Settings
-    epsilon     = 1.5
+    epsilon     = 0.5
     S           = 8
     V           = list(G.nodes())
     run_time    = []    # process time
@@ -157,7 +157,7 @@ def run_experiment1(G, pdist, repeats=10, z=4, N_u=16, N_p=20, run_optimal=True)
 
     return run_time, travel_cost
 
-def run_experiment2(G, pdist, param, repeats=10, z=4, epsilon=1.5, S=8, run_optimal=True):
+def run_experiment2(G, pdist, param, repeats=10, z=4, epsilon=0.5, S=8, run_optimal=True):
     """
     An utility function to run experiment.
 
@@ -175,7 +175,7 @@ def run_experiment2(G, pdist, param, repeats=10, z=4, epsilon=1.5, S=8, run_opti
         If 'e', changes epsilon. epsilon must be array-like (list, tuple, np.ndarray).
     z: int, default = 4
         Number of seats.
-    epsilon: float or array-like, default = 1.5
+    epsilon: float or array-like, default = 0.5
         Extra ratio.
     S: int or array-like, default = 8
         Group size.
@@ -207,7 +207,7 @@ def run_experiment2(G, pdist, param, repeats=10, z=4, epsilon=1.5, S=8, run_opti
     travel_cost = []    # travel cost
 
     for idx in range(repeats):
-        print(f"Run {idx}")
+        print(f"Run {idx+1}")
         # Generate random users, POIs
         rnodes      = np.random.choice(V, size=(N_u+N_p), replace=False)
         U           = rnodes[:N_u]
@@ -220,6 +220,7 @@ def run_experiment2(G, pdist, param, repeats=10, z=4, epsilon=1.5, S=8, run_opti
         _cost = []
 
         for _S, _epsilon in zip(S, epsilon):
+            _epsilon = round(_epsilon, 1)
             # Greedy approach
             t1          = datetime.now()
             tmp         = greedy_approach(U, N, pdist)

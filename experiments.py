@@ -10,7 +10,18 @@ print(type(G), len(G.nodes()), len(G.edges())) # debug
 print(pdist.shape) # debug
 
 # Compare between methods
-run_time, travel_cost = run_experiment1(G, pdist, repeats=10)
+sizes = np.arange(10)
+run_time    = []    
+travel_cost = []
+
+for idx in sizes:
+    print(f"Run {idx+1}")
+    _time, _cost = run_experiment1(G, pdist, repeats=10)
+    _time = _time.mean(axis=0)
+    _cost = _cost.mean(axis=0)
+    run_time.extend(_time)
+    travel_cost.extend(_cost)
+
 save_experiment_results(data_dir, 'compare_methods', run_time, travel_cost)
 
 # Compare group size
@@ -54,7 +65,7 @@ for N_p in sizes:
 save_experiment_results(data_dir, 'compare_number_of_poi', run_time, travel_cost)
 
 # Compare extra ratio
-sizes       = np.linspace(1, 2, num=11)
+sizes       = np.linspace(0.4, 0.5, num=2)
 run_time    = []    
 travel_cost = []
 
