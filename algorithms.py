@@ -167,9 +167,6 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
         J[(m, cost[m])] = m
         visited[m]      = True
     
-    # if comb == (463, 593):
-    #     print(Q)
-    
     prev_cost   = -1
     prev_nodes  = []
     p           = None
@@ -178,9 +175,6 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
     while len(Q) > 0:
         # find the next node
         curr_cost, u = heappop(Q)
-        # if comb == (463, 593):
-        #     print(curr_cost, u)
-        # check detour constraint
         if curr_cost > prev_cost:
             if prev_cost != -1: # check first node
                 X.extend(prev_nodes)
