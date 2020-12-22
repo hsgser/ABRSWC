@@ -1,5 +1,4 @@
 # Import libraries
-from numpy.core.fromnumeric import size
 from algorithms import *
 from utils import *
 

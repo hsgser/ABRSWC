@@ -3,7 +3,6 @@ import numpy as np
 from heapq import heappush, heappop
 from collections import defaultdict
 from itertools import combinations, chain
-from priority_dict import priority_dict
 
 def find_nearest_neighbors(U, s, dist, k=1):
     """
@@ -116,26 +115,26 @@ def powerset(A):
     """
     return list(chain.from_iterable(combinations(A, r) for r in range(1, len(A))))
 
-def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
+def find_mp(M, comb, cost, travelDist, P, G, N, dist, epsilon):
     """
-    Find the NIMP nodes.
+    Find the meeting points.
     
     Parameters
     ----------
     M: array
-        List of IMP nodes.
+        List of intermediate meeting points.
     comb: array
         List of users.
     cost: dict
         Travel costs.
     travelDist: dict
-        Travel distance of each user to IMP nodes.
+        Travel distance of each user to the intermediate meeting points.
     B: list
-        Boundary nodes (POIs).
+        List of POIs.
     G: networkx graph
         Road network.
     N: dict
-        Dictionary of nearest POI
+        Dictionary of nearest POI,
     dist: array
         Pairwise distance.
     epsilon: float
@@ -144,11 +143,11 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
     Returns
     -------
     X: array
-        List of NIMP nodes.
+        List of meeting points.
     cost: dict
         Travel costs.
     travelDist: dict
-        Travel distance of each user to NIMP nodes.
+        Travel distance of each user to the intermediate meeting points.
     J: dict
         Dictionary of meeting points.
     p: int
@@ -182,7 +181,7 @@ def find_nimp(M, comb, cost, travelDist, B, G, N, dist, epsilon):
         else:
             prev_nodes.append(u)
         prev_cost       = curr_cost
-        if u in B: # terminate if a boundary node is found
+        if u in P: # terminate if a boundary node is found
             X.append(u)
             p           = u
             minCost     = curr_cost
@@ -253,7 +252,7 @@ def compute_cost(U, P, G, z, N, dist, epsilon):
 
     # intialization
     for u in U:
-        X[(u,)], cost[(u,)], travelDist[(u,)], J[(u,)], OptPOI[(u,)], OptCost[(u,)] = find_nimp(
+        X[(u,)], cost[(u,)], travelDist[(u,)], J[(u,)], OptPOI[(u,)], OptCost[(u,)] = find_mp(
             [u], [u], {u: 0}, {(u, u, 0): 0}, P, G, N, dist, epsilon)
 
     # dynamic programming
@@ -294,7 +293,7 @@ def compute_cost(U, P, G, z, N, dist, epsilon):
                         for c in comb2:
                             travelDist[comb][(c, m, temp)] = travelDist[comb2][(c, m, cost[comb2][m])]    
             if len(M[comb]) > 0:
-                X[comb], cost[comb], travelDist[comb], J[comb], p, temp = find_nimp(
+                X[comb], cost[comb], travelDist[comb], J[comb], p, temp = find_mp(
                     M[comb], comb, cost[comb], travelDist[comb], P, G, N, dist, epsilon)
                 if (temp != None) and (OptCost[comb] > temp):
                     OptCost[comb]       = temp
