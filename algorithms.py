@@ -122,13 +122,13 @@ def find_mp(M, comb, cost, travelDist, P, G, N, dist, epsilon):
     Parameters
     ----------
     M: array
-        List of intermediate meeting points.
+        List of confluent points.
     comb: array
         List of users.
     cost: dict
         Travel costs.
     travelDist: dict
-        Travel distance of each user to the intermediate meeting points.
+        Travel distance of each user to the confluent points.
     B: list
         List of POIs.
     G: networkx graph
@@ -147,7 +147,7 @@ def find_mp(M, comb, cost, travelDist, P, G, N, dist, epsilon):
     cost: dict
         Travel costs.
     travelDist: dict
-        Travel distance of each user to the intermediate meeting points.
+        Travel distance of each user to the meeting points.
     J: dict
         Dictionary of meeting points.
     p: int
@@ -157,7 +157,7 @@ def find_mp(M, comb, cost, travelDist, P, G, N, dist, epsilon):
     """
     Q           = [] # node set
     J           = {} # meeting points dict
-    X           = [] # NIMPs
+    X           = set() # NIMPs
     visited     = defaultdict(bool)
 
     # intialization
@@ -167,7 +167,7 @@ def find_mp(M, comb, cost, travelDist, P, G, N, dist, epsilon):
         visited[m]      = True
     
     prev_cost   = -1
-    prev_nodes  = []
+    prev_nodes  = set()
     p           = None
     minCost     = None
     
@@ -176,36 +176,37 @@ def find_mp(M, comb, cost, travelDist, P, G, N, dist, epsilon):
         curr_cost, u = heappop(Q)
         if curr_cost > prev_cost:
             if prev_cost != -1: # check first node
-                X.extend(prev_nodes)
-            prev_nodes  = [u]
+                X = X.union(prev_nodes)
+            prev_nodes  = {u}
         else:
-            prev_nodes.append(u)
+            prev_nodes.add(u)
         prev_cost       = curr_cost
         if u in P: # terminate if a boundary node is found
-            X.append(u)
+            X.add(u)
             p           = u
             minCost     = curr_cost
             break
 
         for v in G.neighbors(u):
-            if not visited[v]:
-                cost[v]     = float('inf')
-                visited[v]  = True
-            temp            = curr_cost + G.edges[u, v]['length']
-            if cost[v] > temp:
-                # check detour constraint
-                violation       = False
-                for c in comb:
-                    travelDist[(c, v, temp)]  = travelDist[(c, u, curr_cost)] + G.edges[u, v]['length']
-                    if (travelDist[(c, v, temp)] + dist[v][N[v]]) > (1 + epsilon)*dist[c][N[c]]:
-                        violation       = True
-                        break
-                if not violation:
-                    cost[v]     = temp
-                    J[(v, cost[v])]     = J[(u, curr_cost)]
-                    heappush(Q, (cost[v], v))
+            if v not in X.union(prev_nodes):
+                if not visited[v]:
+                    cost[v]     = float('inf')
+                    visited[v]  = True
+                temp            = curr_cost + G.edges[u, v]['length']
+                if cost[v] > temp:
+                    # check detour constraint
+                    violation       = False
+                    for c in comb:
+                        travelDist[(c, v, temp)]  = travelDist[(c, u, curr_cost)] + G.edges[u, v]['length']
+                        if (travelDist[(c, v, temp)] + dist[v][N[v]]) > (1 + epsilon)*dist[c][N[c]]:
+                            violation       = True
+                            break
+                    if not violation:
+                        cost[v]     = temp
+                        J[(v, cost[v])]     = J[(u, curr_cost)]
+                        heappush(Q, (cost[v], v))
 
-    return set(X), cost, travelDist, J, p, minCost
+    return X, cost, travelDist, J, p, minCost
 
 def compute_cost(U, P, G, z, N, dist, epsilon):
     """
@@ -243,6 +244,7 @@ def compute_cost(U, P, G, z, N, dist, epsilon):
         Best subgroup of each combination to minimize travel cost.
     """
     V           = list(G.nodes())
+    P           = set(P)
     X           = {} # NIMPs
     cost        = {} # travel cost
     J           = {} # meeting points
